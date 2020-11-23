@@ -1,4 +1,7 @@
 import { Characteristic, PrimaryService } from '@abandonware/bleno';
+import * as Debug from 'debug';
+
+const debug = Debug('beatble:service');
 
 // layout:
 //   0xAA00BC0D
@@ -24,12 +27,14 @@ class KeyInputCharacteristic extends Characteristic {
     _maxValueSize: number,
     updateValueCallback: (data: Buffer) => void
   ) {
+    debug('keyInput:onSubscribe', _maxValueSize);
     this.timer = setTimeout(() => {
       updateValueCallback(Buffer.alloc(0xff));
     }, 1000);
   }
 
   onUnsubscribe(): void {
+    debug('keyInput:onUnsubscribe');
     if (this.timer) {
       clearTimeout(this.timer);
     }
@@ -57,6 +62,7 @@ class Unknown3Characteristic extends Characteristic {
     _maxValueSize: number,
     updateValueCallback: (data: Buffer) => void
   ) {
+    debug('unknown3:onSubscribe', _maxValueSize);
     updateValueCallback(Buffer.alloc(0x0105)); // to 0x0101
   }
 }

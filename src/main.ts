@@ -3,7 +3,7 @@ import * as Debug from 'debug';
 
 import { KeyInputService } from './keyInputService';
 
-const debug = Debug('main');
+const debug = Debug('beatble');
 const keyInputService = new KeyInputService();
 
 const beacon = {
