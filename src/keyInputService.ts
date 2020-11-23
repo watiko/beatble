@@ -29,7 +29,7 @@ class KeyInputCharacteristic extends Characteristic {
   ) {
     debug('keyInput:onSubscribe', _maxValueSize);
     this.timer = setTimeout(() => {
-      updateValueCallback(Buffer.alloc(0xff));
+      updateValueCallback(Buffer.from([0xff]));
     }, 1000);
   }
 
@@ -63,7 +63,7 @@ class Unknown3Characteristic extends Characteristic {
     updateValueCallback: (data: Buffer) => void
   ) {
     debug('unknown3:onSubscribe', _maxValueSize);
-    updateValueCallback(Buffer.alloc(0x0105)); // to 0x0101
+    updateValueCallback(Buffer.from([0x01, 0x05])); // 0x0105 to 0x0101
   }
 }
 
