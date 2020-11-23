@@ -1,4 +1,4 @@
-import { Characteristic, Descriptor, PrimaryService } from '@abandonware/bleno';
+import { Characteristic, PrimaryService } from '@abandonware/bleno';
 
 // layout:
 //   0xAA00BC0D
@@ -15,12 +15,6 @@ class KeyInputCharacteristic extends Characteristic {
     super({
       uuid: 'FF01',
       properties: ['notify'],
-      descriptors: [
-        new Descriptor({
-          uuid: '2902',
-          value: 'Notifications enabled',
-        }),
-      ],
     });
   }
 
@@ -56,12 +50,6 @@ class Unknown3Characteristic extends Characteristic {
     super({
       uuid: 'FF03',
       properties: ['notify', 'write'],
-      descriptors: [
-        new Descriptor({
-          uuid: '2902',
-          value: 'Notifications enabled',
-        }),
-      ],
     });
   }
 
