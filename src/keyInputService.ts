@@ -1,43 +1,35 @@
 import { Characteristic, PrimaryService } from '@abandonware/bleno';
 import * as Debug from 'debug';
 
+import { KeyInputObserver } from './keyInputObserver';
+
 const debug = Debug('beatble:service');
 
-// layout:
-//   0xAA00BC0D
-//   0xEEEE00BC
-//   0x0DFF
-// AA:   disk rotation (clockwise is positive)
-// B:    sum of B5(0x1), B6(0x2), B7(0x4)
-// C:    sum of B1(0x1), B2(0x2), B3(0x4), B4(0x8)
-// D:    sum of E1(0x1), E2(0x2)
-// EEEE: increment by 2 (little endian?)
-// FF:   increment by 2
 class KeyInputCharacteristic extends Characteristic {
-  constructor() {
+  private updateFn = (_data: Buffer): void => {};
+
+  constructor(keyInputObserver: KeyInputObserver) {
     super({
       uuid: 'FF01',
       properties: ['notify'],
     });
-  }
 
-  private timer?: NodeJS.Timeout;
+    keyInputObserver.subscribe((data: Buffer) => {
+      this.updateFn(data);
+    });
+  }
 
   onSubscribe(
     _maxValueSize: number,
     updateValueCallback: (data: Buffer) => void
   ) {
     debug('keyInput:onSubscribe', _maxValueSize);
-    this.timer = setTimeout(() => {
-      updateValueCallback(Buffer.from([0xff]));
-    }, 1000);
+    this.updateFn = updateValueCallback;
   }
 
   onUnsubscribe(): void {
     debug('keyInput:onUnsubscribe');
-    if (this.timer) {
-      clearTimeout(this.timer);
-    }
+    this.updateFn = () => {};
   }
 }
 
@@ -68,11 +60,11 @@ class Unknown3Characteristic extends Characteristic {
 }
 
 export class KeyInputService extends PrimaryService {
-  constructor() {
+  constructor(keyInputObserver: KeyInputObserver) {
     super({
       uuid: 'FF00',
       characteristics: [
-        new KeyInputCharacteristic(),
+        new KeyInputCharacteristic(keyInputObserver),
         new Unknown2Characteristic(),
         new Unknown3Characteristic(),
       ],
