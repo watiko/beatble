@@ -11,23 +11,68 @@ const debug = Debug('beatble');
 const keyInputSubject = new KeyInputSubject();
 const keyInputService = new KeyInputService(keyInputSubject);
 
-const beacon = {
-  uuid: 'fda50693-a4e2-4fb1-afcf-c6eb07647825',
-  major: 10052,
-  minor: 35817,
-  measuredPower: -59,
-};
+const adv = Buffer.from([
+  2,
+  1,
+  6,
+  26,
+  255,
+  76,
+  0,
+  2,
+  21,
+  253,
+  165,
+  6,
+  147,
+  164,
+  226,
+  79,
+  177,
+  175,
+  207,
+  198,
+  235,
+  7,
+  100,
+  120,
+  37,
+  39,
+  68,
+  139,
+  233,
+  197,
+]);
+const scan = Buffer.from([
+  3,
+  3,
+  0,
+  255,
+  17,
+  9,
+  73,
+  73,
+  68,
+  88,
+  32,
+  69,
+  110,
+  116,
+  114,
+  121,
+  32,
+  109,
+  111,
+  100,
+  101,
+  108,
+]);
 
 bleno.on('stateChange', (state) => {
   debug('stateChange', state);
 
   if (state === 'poweredOn') {
-    bleno.startAdvertisingIBeacon(
-      beacon.uuid,
-      beacon.major,
-      beacon.minor,
-      beacon.measuredPower
-    );
+    bleno.startAdvertisingWithEIRData(adv, scan);
   } else {
     bleno.stopAdvertising();
   }
