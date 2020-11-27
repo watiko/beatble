@@ -2,13 +2,13 @@ import * as bleno from '@abandonware/bleno';
 import * as Debug from 'debug';
 import { inputToData, KeyInput, KEY_TYPE } from './keyInput';
 
-import { KeyInputSubject } from './keyInputObserver';
+import { Subject } from './lib/Observer';
 import { KeyInputService } from './keyInputService';
 
 const debug = Debug('beatble');
 
 // init
-const keyInputSubject = new KeyInputSubject();
+const keyInputSubject = new Subject<Buffer>();
 const keyInputService = new KeyInputService(keyInputSubject);
 
 const adv = Buffer.from([

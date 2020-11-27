@@ -1,14 +1,14 @@
 import { Characteristic, PrimaryService } from '@abandonware/bleno';
 import * as Debug from 'debug';
 
-import { KeyInputObserver } from './keyInputObserver';
+import { Observer } from './lib/Observer';
 
 const debug = Debug('beatble:service');
 
 class KeyInputCharacteristic extends Characteristic {
   private updateFn = (_data: Buffer): void => {};
 
-  constructor(keyInputObserver: KeyInputObserver) {
+  constructor(keyInputObserver: Observer<Buffer>) {
     super({
       uuid: 'FF01',
       properties: ['notify'],
@@ -60,7 +60,7 @@ class Unknown3Characteristic extends Characteristic {
 }
 
 export class KeyInputService extends PrimaryService {
-  constructor(keyInputObserver: KeyInputObserver) {
+  constructor(keyInputObserver: Observer<Buffer>) {
     super({
       uuid: 'FF00',
       characteristics: [
