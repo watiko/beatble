@@ -15,8 +15,13 @@ export type KEY_TYPE = valueof<typeof KEY_TYPE>;
 
 export type KeyInput = {
   diskRotation: number; // clock wise is positive
-  pressed: KEY_TYPE[];
+  pressed: Set<KEY_TYPE>;
 };
+
+export const emptyInput = (): KeyInput => ({
+  diskRotation: 0,
+  pressed: new Set(),
+});
 
 let counter = 1;
 

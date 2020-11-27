@@ -1,15 +1,17 @@
 import * as bleno from '@abandonware/bleno';
 import * as Debug from 'debug';
-import { inputToData, KeyInput, KEY_TYPE } from './keyInput';
+import { emptyInput, inputToData } from './joystick/keyInput';
 
 import { Subject } from './lib/Observer';
 import { KeyInputService } from './keyInputService';
+import { EntryModelObserver } from './joystick/entrymodel';
 
 const debug = Debug('beatble');
 
 // init
 const keyInputSubject = new Subject<Buffer>();
 const keyInputService = new KeyInputService(keyInputSubject);
+const entryModelObserver = new EntryModelObserver();
 
 const adv = Buffer.from([
   2,
@@ -90,10 +92,11 @@ bleno.on('advertisingStart', (error) => {
 
 // input loop
 
-let input: KeyInput = {
-  diskRotation: 0x11,
-  pressed: [KEY_TYPE.B1, KEY_TYPE.E1, KEY_TYPE.B6],
-};
+let input = emptyInput();
+
+entryModelObserver.subscribe((newInput) => {
+  input = newInput;
+});
 
 const interval = 8; // 1000 / 120
 setInterval(() => {
