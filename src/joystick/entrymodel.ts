@@ -40,6 +40,9 @@ function reduce(state: KeyInput, event: ButtonEvent | AxisEvent): KeyInput {
         diskRotation: event.value >> 8,
       };
     case 'button':
+      if (event.number === 10 || event.number === 11) {
+        return state;
+      }
       const keyType = buttonNumberToKey(event.number);
       const buttonIsOn = event.value === 1;
       if (buttonIsOn) {
