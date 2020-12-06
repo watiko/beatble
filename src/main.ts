@@ -13,61 +13,31 @@ const keyInputSubject = new Subject<Buffer>();
 const keyInputService = new KeyInputService(keyInputSubject);
 const entryModelObserver = new EntryModelObserver();
 
+// prettier-ignore
 const adv = Buffer.from([
-  2,
-  1,
-  6,
-  26,
-  255,
-  76,
-  0,
-  2,
-  21,
-  253,
-  165,
-  6,
-  147,
-  164,
-  226,
-  79,
-  177,
-  175,
-  207,
-  198,
-  235,
-  7,
-  100,
-  120,
-  37,
-  39,
-  68,
-  139,
-  233,
-  197,
+  // len: 2, type: 0x1
+  2,    0x01,
+  0x06,
+  // len: 26, type: 0xFF
+  26, 0xFF,
+  0x4C, 0x00, 0x02, 0x15, 0xFD,
+  0xA5, 0x06, 0x93, 0xA4, 0xE2,
+  0x4F, 0xB1, 0xAF, 0xCF, 0xC6,
+  0xEB, 0x07, 0x64, 0x78, 0x25,
+  0x27, 0x44, 0x8B, 0xE9, 0xC5,
 ]);
+
+// prettier-ignore
 const scan = Buffer.from([
-  3,
-  3,
-  0,
-  255,
-  17,
-  9,
-  73,
-  73,
-  68,
-  88,
-  32,
-  69,
-  110,
-  116,
-  114,
-  121,
-  32,
-  109,
-  111,
-  100,
-  101,
-  108,
+  // len: 3, type: 0x3
+  3,    0x03,
+  0x00, 0xFF,
+  // len: 17, type: 0x09
+  17, 0x09,
+  0x49, 0x49, 0x44, 0x58, 0x20,
+  0x45, 0x6E, 0x74, 0x72, 0x79,
+  0x20, 0x6D, 0x6F, 0x64, 0x65,
+  0x6C,
 ]);
 
 bleno.on('stateChange', (state) => {
