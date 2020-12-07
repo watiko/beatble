@@ -1,6 +1,7 @@
 import JoyStick = require('joystick');
 import type { ButtonEvent, AxisEvent } from 'joystick';
-import { Observer } from '../lib/Observer';
+
+import { Observer } from '../Observer';
 import { emptyInput, KeyInput, KEY_TYPE } from './keyInput';
 
 function buttonNumberToKey(n: number): KEY_TYPE {

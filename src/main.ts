@@ -1,105 +1,36 @@
-import * as bleno from '@abandonware/bleno';
 import * as Debug from 'debug';
-import { emptyInput, inputToData } from './joystick/keyInput';
+import { Worker } from 'worker_threads';
 
-import { Subject } from './lib/Observer';
-import { KeyInputService } from './keyInputService';
-import { EntryModelObserver } from './joystick/entrymodel';
+const debug = Debug('beatble:main');
 
-const debug = Debug('beatble');
+debug('starting beatble...');
 
-// init
-const keyInputSubject = new Subject<Buffer>();
-const keyInputService = new KeyInputService(keyInputSubject);
-const entryModelObserver = new EntryModelObserver();
+const keyInputSharedBuffer = new SharedArrayBuffer(4);
+debug('Atomics.isLockFree(4)', Atomics.isLockFree(4));
 
-const adv = Buffer.from([
-  2,
-  1,
-  6,
-  26,
-  255,
-  76,
-  0,
-  2,
-  21,
-  253,
-  165,
-  6,
-  147,
-  164,
-  226,
-  79,
-  177,
-  175,
-  207,
-  198,
-  235,
-  7,
-  100,
-  120,
-  37,
-  39,
-  68,
-  139,
-  233,
-  197,
-]);
-const scan = Buffer.from([
-  3,
-  3,
-  0,
-  255,
-  17,
-  9,
-  73,
-  73,
-  68,
-  88,
-  32,
-  69,
-  110,
-  116,
-  114,
-  121,
-  32,
-  109,
-  111,
-  100,
-  101,
-  108,
-]);
-
-bleno.on('stateChange', (state) => {
-  debug('stateChange', state);
-
-  if (state === 'poweredOn') {
-    bleno.startAdvertisingWithEIRData(adv, scan);
-  } else {
-    bleno.stopAdvertising();
-  }
+const inputWorker = new Worker('./worker/input.js', {
+  workerData: { keyInputSharedBuffer },
+});
+const bleWorker = new Worker('./worker/ble.js', {
+  workerData: { keyInputSharedBuffer },
 });
 
-bleno.on('advertisingStart', (error) => {
-  debug('advertisingStart', !error ? 'ok' : error);
+type WorkerExit = {
+  exitCode: number;
+  worker: string;
+};
 
-  if (!error) {
-    bleno.setServices([keyInputService], (error) => {
-      debug('setServices', !error ? 'ok' : error);
-    });
-  }
+const exitWrapper = (name: string, resolve: (v: WorkerExit) => void) => (
+  exitCode: number
+): void =>
+  resolve({
+    exitCode,
+    worker: name,
+  });
+
+Promise.race<Promise<WorkerExit>>([
+  new Promise((r) => inputWorker.on('exit', exitWrapper('input', r))),
+  new Promise((r) => bleWorker.on('exit', exitWrapper('ble', r))),
+]).then((exit) => {
+  console.log('exit worker thread: ', exit);
 });
-
-// input loop
-
-let input = emptyInput();
-
-entryModelObserver.subscribe((newInput) => {
-  input = newInput;
-});
-
-const interval = 8; // 1000 / 120
-setInterval(() => {
-  const data = inputToData(input);
-  keyInputSubject.next(data);
-}, interval);

@@ -1,7 +1,7 @@
 import { Characteristic, PrimaryService } from '@abandonware/bleno';
 import * as Debug from 'debug';
 
-import { Observer } from './lib/Observer';
+import { Observer } from '../Observer';
 
 const debug = Debug('beatble:service');
 
