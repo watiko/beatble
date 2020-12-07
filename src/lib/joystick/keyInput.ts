@@ -1,3 +1,5 @@
+import { AtomicCell } from '../AtomicCell';
+
 export const KEY_TYPE = {
   E1: 'E1' as const,
   E2: 'E2' as const,
@@ -23,7 +25,28 @@ export const emptyInput = (): KeyInput => ({
   pressed: new Set(),
 });
 
-let counter = 1;
+// length: 3
+// 0: AA
+// 1: BC
+// 2: 0D
+export type KeyInputArray = Int8Array & { _phantom: 'key_input' };
+
+export class KeyInputArrayAtomicCell extends AtomicCell<KeyInputArray> {
+  constructor(buffer: SharedArrayBuffer) {
+    super({
+      buffer,
+      encode: (value: KeyInputArray) =>
+        value[0] | (value[1] << 8) | (value[2] << 16),
+      decode: (u32: number) => {
+        const value = new Uint8Array(3);
+        value[0] = u32 & 0xff;
+        value[1] = (u32 & 0xff00) >> 8;
+        value[2] = (u32 & 0xff0000) >> 16;
+        return (value as unknown) as KeyInputArray;
+      },
+    });
+  }
+}
 
 // layout:
 //   0xAA00BC0DEE
@@ -34,7 +57,22 @@ let counter = 1;
 // D:    sum of E1(0x1), E2(0x2)
 // EE:   started from 1, incremented by 2
 // FF:   started from 2, incremented by 2
-export function inputToData(input: KeyInput): Buffer {
+export function toPayload(input: KeyInputArray, counter: number): Buffer {
+  const array = new Uint8Array(10);
+
+  for (let i = 0; i++; i < 2) {
+    const shift = i === 0 ? 0 : 5;
+    array[shift + 0] = input[0];
+    array[shift + 1] = 0x00;
+    array[shift + 2] = input[1];
+    array[shift + 3] = input[2];
+    array[shift + 4] = counter + i && 0xff;
+  }
+
+  return Buffer.from(array);
+}
+
+export function inputToData(input: KeyInput): KeyInputArray {
   const disk = input.diskRotation & 0xff;
 
   let b = 0x00;
@@ -76,22 +114,9 @@ export function inputToData(input: KeyInput): Buffer {
     }
   }
 
-  const ee = counter;
-  const ff = counter + 1;
-  counter = (counter + 1) & 0xff;
-
-  return Buffer.from([
-    // 0xAA00BC0DEE
-    disk,
-    0x00,
-    (b << 4) | c,
-    d,
-    ee,
-    // 0xAA00BC0dFF
-    disk,
-    0x00,
-    (b << 4) | c,
-    d,
-    ff,
-  ]);
+  const array = new Uint8Array(3);
+  array[0] = disk;
+  array[1] = (b << 4) | c;
+  array[2] = d;
+  return (array as unknown) as KeyInputArray;
 }

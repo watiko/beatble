@@ -1,7 +1,8 @@
 import { Characteristic, PrimaryService } from '@abandonware/bleno';
 import * as Debug from 'debug';
+import { KeyInputArray } from '../joystick/keyInput';
 
-import { Observer } from './lib/Observer';
+import { Observer } from '../Observer';
 
 const debug = Debug('beatble:service');
 
